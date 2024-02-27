@@ -5,9 +5,10 @@ data "google_compute_default_service_account" "default" {
 resource "google_compute_instance" "default" {
   provider = google
 
-  name                      = local.vm_name
-  machine_type              = local.machine_type
-  zone                      = "us-central1-a"
+  name         = local.vm_name
+  machine_type = local.machine_type
+  # below change are test purpose, will drop
+  zone                      = "europe-west1-d"
   allow_stopping_for_update = true
 
   boot_disk {
@@ -69,6 +70,8 @@ resource "google_compute_address" "static-preview-ip" {
   provider = google
 
   name = var.preview_name
+  # below change are test purpose, will drop
+  region = "europe-west1"
 }
 
 data "kubernetes_secret" "harvester-k3s-dockerhub-pull-account" {

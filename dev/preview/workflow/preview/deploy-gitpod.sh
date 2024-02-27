@@ -22,7 +22,7 @@ PREVIEW_SORUCE_CERT_NAME="harvester-${PREVIEW_NAME}"
 
 GITPOD_AGENT_SMITH_TOKEN="$(openssl rand -hex 30)"
 GITPOD_AGENT_SMITH_TOKEN_HASH="$(echo -n "$GITPOD_AGENT_SMITH_TOKEN" | sha256sum - | tr -d '  -')"
-GITPOD_CONTAINER_REGISTRY_URL="eu.gcr.io/gitpod-core-dev/build/";
+# GITPOD_CONTAINER_REGISTRY_URL="eu.gcr.io/gitpod-core-dev/build/";
 GITPOD_IMAGE_PULL_SECRET_NAME="gcp-sa-registry-auth";
 GITPOD_PROXY_SECRET_NAME="proxy-config-certificates";
 GITPOD_ANALYTICS="${GITPOD_ANALYTICS:-}"
@@ -221,12 +221,15 @@ rm shortname.yaml
 
 #
 # configureContainerRegistry
+# below change are test purpose, will drop
 #
 yq w -i "${INSTALLER_CONFIG_PATH}" certificate.name "${GITPOD_PROXY_SECRET_NAME}"
-yq w -i "${INSTALLER_CONFIG_PATH}" containerRegistry.inCluster "false"
-yq w -i "${INSTALLER_CONFIG_PATH}" containerRegistry.external.url "${GITPOD_CONTAINER_REGISTRY_URL}"
-yq w -i "${INSTALLER_CONFIG_PATH}" containerRegistry.external.certificate.kind secret
-yq w -i "${INSTALLER_CONFIG_PATH}" containerRegistry.external.certificate.name "${GITPOD_IMAGE_PULL_SECRET_NAME}"
+yq w -i "${INSTALLER_CONFIG_PATH}" containerRegistry.inCluster "true"
+yq w -i "${INSTALLER_CONFIG_PATH}" experimental.workspace.imageBuilderMk3.baseImageRepositoryName "base-images-new"
+yq w -i "${INSTALLER_CONFIG_PATH}" experimental.workspace.imageBuilderMk3.workspaceImageRepositoryName "workspace-images-new"
+# yq w -i "${INSTALLER_CONFIG_PATH}" containerRegistry.external.url "${GITPOD_CONTAINER_REGISTRY_URL}"
+# yq w -i "${INSTALLER_CONFIG_PATH}" containerRegistry.external.certificate.kind secret
+# yq w -i "${INSTALLER_CONFIG_PATH}" containerRegistry.external.certificate.name "${GITPOD_IMAGE_PULL_SECRET_NAME}"
 
 #
 # configureDomain
