@@ -26,6 +26,7 @@ import (
 	gitpodapi "github.com/gitpod-io/gitpod/gitpod-protocol"
 	api "github.com/gitpod-io/gitpod/ide-service-api"
 	"github.com/gitpod-io/gitpod/ide-service-api/config"
+	oci_tool "github.com/gitpod-io/gitpod/ide-service/pkg/ocitool"
 	"github.com/heptiolabs/healthcheck"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
@@ -214,6 +215,11 @@ func (s *IDEServiceServer) readOverrideVscodeImageConfigFlag(ctx context.Context
 		vscodeIDEOption := ideOptions["code"]
 		vscodeIDEOption.Image = cfg.Image
 		vscodeIDEOption.ImageLayers = cfg.ImageLayers
+		if resolvedVersion, err := oci_tool.ResolveIDEVersion(ctx, s.resolver(), cfg.Image); err != nil {
+			log.WithError(err).Error("cannot get version from override image")
+		} else {
+			vscodeIDEOption.ImageVersion = resolvedVersion
+		}
 		ideOptions["code"] = vscodeIDEOption
 
 		ideConfig := &config.IDEConfig{
