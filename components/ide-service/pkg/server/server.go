@@ -199,6 +199,7 @@ func (s *IDEServiceServer) GetConfig(ctx context.Context, req *api.GetConfigRequ
 
 func (s *IDEServiceServer) readOverrideVscodeImageConfigFlag(ctx context.Context, attributes experiments.Attributes) (*config.IDEConfig, string) {
 	overrideVscodeImageConfig := s.experimentsClient.GetStringValue(ctx, "overrideVscodeImageConfig", "undefined", attributes)
+	log.Infof("override config value %s", overrideVscodeImageConfig)
 	if overrideVscodeImageConfig != "undefined" {
 		var cfg config.IDEVersion
 		if err := json.Unmarshal([]byte(overrideVscodeImageConfig), &cfg); err != nil {
