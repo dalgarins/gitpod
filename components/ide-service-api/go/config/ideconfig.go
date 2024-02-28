@@ -69,6 +69,13 @@ type IDEOption struct {
 	LatestImageLayers []string `json:"latestImageLayers,omitempty"`
 }
 
+type IDEVersion struct {
+	// Image ref to the IDE image.
+	Image string `json:"image"`
+	// ImageLayers for additional ide layers and dependencies
+	ImageLayers []string `json:"imageLayers,omitempty"`
+}
+
 type IDEClient struct {
 	// DefaultDesktopIDE when the user has not specified one.
 	DefaultDesktopIDE string `json:"defaultDesktopIDE,omitempty"`

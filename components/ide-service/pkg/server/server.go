@@ -183,11 +183,58 @@ func (s *IDEServiceServer) GetConfig(ctx context.Context, req *api.GetConfigRequ
 		return &api.GetConfigResponse{
 			Content: s.parsedCode1_85IDEConfigContent,
 		}, nil
-	} else {
+	}
+
+	ideConfig, parsedIdeConfig := s.readOverrideVscodeImageConfigFlag(ctx, attributes)
+	if ideConfig == nil {
 		return &api.GetConfigResponse{
-			Content: s.parsedIDEConfigContent,
+			Content: parsedIdeConfig,
 		}, nil
 	}
+
+	return &api.GetConfigResponse{
+		Content: s.parsedIDEConfigContent,
+	}, nil
+}
+
+func (s *IDEServiceServer) readOverrideVscodeImageConfigFlag(ctx context.Context, attributes experiments.Attributes) (*config.IDEConfig, string) {
+	overrideVscodeImageConfig := s.experimentsClient.GetStringValue(ctx, "overrideVscodeImageConfig", "undefined", attributes)
+	if overrideVscodeImageConfig != "undefined" {
+		var cfg config.IDEVersion
+		if err := json.Unmarshal([]byte(overrideVscodeImageConfig), &cfg); err != nil {
+			log.WithError(err).Error("cannot parse overrideVscodeImageConfig value")
+			return nil, ""
+		}
+
+		ideOptions := make(map[string]config.IDEOption)
+		for key, value := range s.ideConfig.IdeOptions.Options {
+			ideOptions[key] = value
+		}
+		vscodeIDEOption := ideOptions["code"]
+		vscodeIDEOption.Image = cfg.Image
+		vscodeIDEOption.ImageLayers = cfg.ImageLayers
+		ideOptions["code"] = vscodeIDEOption
+
+		ideConfig := &config.IDEConfig{
+			SupervisorImage: s.ideConfig.SupervisorImage,
+			IdeOptions: config.IDEOptions{
+				Options:           ideOptions,
+				DefaultIde:        s.ideConfig.IdeOptions.DefaultIde,
+				DefaultDesktopIde: s.ideConfig.IdeOptions.DefaultDesktopIde,
+				Clients:           s.ideConfig.IdeOptions.Clients,
+			},
+		}
+
+		parsedConfig, err := json.Marshal(ideConfig)
+		if err != nil {
+			log.WithError(err).Error("cannot parse overrideVscodeImageConfig value")
+			return nil, ""
+		}
+
+		return ideConfig, string(parsedConfig)
+	}
+
+	return nil, ""
 }
 
 func (s *IDEServiceServer) readIDEConfig(ctx context.Context, isInit bool) {
@@ -355,6 +402,15 @@ func (s *IDEServiceServer) ResolveWorkspaceConfig(ctx context.Context, req *api.
 
 	// make a copy for ref ideConfig, it's safe because we replace ref in update config
 	ideConfig := s.code1_85IdeConfig
+
+	attributes := experiments.Attributes{
+		UserID:    req.User.Id,
+		UserEmail: req.User.GetEmail(),
+	}
+	overrideIdeConfig, _ := s.readOverrideVscodeImageConfigFlag(ctx, attributes)
+	if ideConfig != nil {
+		ideConfig = overrideIdeConfig
+	}
 
 	var defaultIde *config.IDEOption
 
