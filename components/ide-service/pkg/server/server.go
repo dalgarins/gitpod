@@ -186,7 +186,7 @@ func (s *IDEServiceServer) GetConfig(ctx context.Context, req *api.GetConfigRequ
 	}
 
 	ideConfig, parsedIdeConfig := s.readOverrideVscodeImageConfigFlag(ctx, attributes)
-	if ideConfig == nil {
+	if ideConfig != nil {
 		return &api.GetConfigResponse{
 			Content: parsedIdeConfig,
 		}, nil
