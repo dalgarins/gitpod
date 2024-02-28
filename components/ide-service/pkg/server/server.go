@@ -230,7 +230,7 @@ func (s *IDEServiceServer) readOverrideVscodeImageConfigFlag(ctx context.Context
 			log.WithError(err).Error("cannot parse overrideVscodeImageConfig value")
 			return nil, ""
 		}
-
+		log.Info("override config")
 		return ideConfig, string(parsedConfig)
 	}
 
