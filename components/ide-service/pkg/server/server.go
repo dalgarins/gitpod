@@ -408,7 +408,7 @@ func (s *IDEServiceServer) ResolveWorkspaceConfig(ctx context.Context, req *api.
 		UserEmail: req.User.GetEmail(),
 	}
 	overrideIdeConfig, _ := s.readOverrideVscodeImageConfigFlag(ctx, attributes)
-	if ideConfig != nil {
+	if overrideIdeConfig != nil {
 		ideConfig = overrideIdeConfig
 	}
 
